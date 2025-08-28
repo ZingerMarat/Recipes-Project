@@ -2,18 +2,25 @@ import { v4 as uuidv4 } from "uuid"
 import { readRecipes, writeRecipes } from "../utils/fileHelpers.js"
 
 export const getAllRecipes = async (req, res, next) => {
-  //GET /recipes?difficulty=easy&maxCookingTime=30&search=pasta
+  //GET /recipes?difficulty=easy%20medium&maxCookingTime=30&search=pasta%20tomato
   const { difficulty, maxCookingTime, search } = req.query
 
   try {
     const recipes = await readRecipes()
+    const maxTime = Number(maxCookingTime)
 
     const filteredRecipes = recipes.filter((r) => {
-      const matchesDifficulty = difficulty ? r.difficulty === difficulty : true
-      const matchesTime = maxCookingTime ? r.cookingTime <= Number(maxCookingTime) : true
+      const matchesDifficulty = difficulty ? difficulty.split(" ").includes(r.difficulty) : true
+      const matchesTime =
+        maxCookingTime && !isNaN(maxTime) ? r.cookingTime <= Number(maxCookingTime) : true
       const matchesSearch = search
-        ? r.title.toLowerCase().includes(search.toLowerCase()) ||
-          r.description.toLowerCase().includes(search.toLowerCase())
+        ? search
+            .split(" ")
+            .some(
+              (searchWord) =>
+                r.title.toLowerCase().includes(searchWord.toLowerCase()) ||
+                r.description.toLowerCase().includes(searchWord.toLowerCase())
+            )
         : true
 
       return matchesDifficulty && matchesSearch && matchesTime
