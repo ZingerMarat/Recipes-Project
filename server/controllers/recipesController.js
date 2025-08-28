@@ -158,3 +158,28 @@ export const getStats = async (req, res, next) => {
     next(err)
   }
 }
+
+export const updateRating = async (req, res, next) => {
+  const { id, rating } = req.params
+  const newRating = Number(rating)
+
+  try {
+    if (isNaN(newRating) || newRating < 0 || newRating > 5) {
+      return res.status(400).json({ message: "Rating must be a number between 0 and 5" })
+    }
+
+    const recipes = await readRecipes()
+    const recipe = recipes.find((r) => r.id === id)
+
+    if (!recipe) {
+      return res.status(404).json({ message: "Recipe not found" })
+    }
+
+    recipe.rating = newRating
+    await writeRecipes(recipes)
+
+    res.status(200).json(recipe)
+  } catch (err) {
+    next(err)
+  }
+}

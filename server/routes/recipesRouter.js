@@ -7,6 +7,7 @@ import {
   updateRecipe,
   deleteRecipe,
   getStats,
+  updateRating,
 } from "../controllers/recipesController.js"
 import { validateRecipeMiddleware } from "../middleware/validateRecipeMiddleware.js"
 
@@ -17,6 +18,7 @@ router.get("/stats", getStats)
 router.get("/:id", getRecipe)
 router.post("/", validateRecipeMiddleware, addRecipe)
 router.put("/:id", validateRecipeMiddleware, updateRecipe)
+router.put("/:id/rating/:rating", updateRating)
 router.delete("/:id", deleteRecipe)
 
 export default router
