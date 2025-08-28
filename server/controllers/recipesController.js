@@ -1,11 +1,13 @@
-import recipes from "../data/recipes.js"
 import { v4 as uuidv4 } from "uuid"
+import { readRecipes, writeRecipes } from "../utils/fileHelpers.js"
 
-export const getAllRecipes = (req, res, next) => {
+export const getAllRecipes = async (req, res, next) => {
   //GET /recipes?difficulty=easy&maxCookingTime=30&search=pasta
   const { difficulty, maxCookingTime, search } = req.query
 
   try {
+    const recipes = await readRecipes()
+
     const filteredRecipes = recipes.filter((r) => {
       const matchesDifficulty = difficulty ? r.difficulty === difficulty : true
       const matchesTime = maxCookingTime ? r.cookingTime <= Number(maxCookingTime) : true
@@ -27,14 +29,15 @@ export const getAllRecipes = (req, res, next) => {
   }
 }
 
-export const getRecipe = (req, res, next) => {
+export const getRecipe = async (req, res, next) => {
   //GET /recipes/:id
   const id = req.params.id
 
   try {
-    const recipe = recipes.filter((r) => r.id === id)
+    const recipes = await readRecipes()
+    const recipe = recipes.find((r) => r.id === id)
 
-    if (!recipe.length) {
+    if (!recipe) {
       return res.status(404).json({ message: "No recipe found with the same id" })
     }
 
@@ -44,15 +47,19 @@ export const getRecipe = (req, res, next) => {
   }
 }
 
-export const addRecipe = (req, res, next) => {
+export const addRecipe = async (req, res, next) => {
   //POST /recipes/
   const newRecipe = req.body
   const id = uuidv4()
   const createdAt = new Date().toISOString()
 
   try {
+    const recipes = await readRecipes()
+
     const recipe = { id, ...newRecipe, createdAt }
     recipes.push(recipe)
+
+    await writeRecipes(recipes)
 
     res.status(201).json(recipe)
   } catch (err) {
@@ -60,12 +67,14 @@ export const addRecipe = (req, res, next) => {
   }
 }
 
-export const updateRecipe = (req, res, next) => {
+export const updateRecipe = async (req, res, next) => {
   //PUT /recipes/:id
   const id = req.params.id
   const update = req.body
 
   try {
+    const recipes = await readRecipes()
+
     const index = recipes.findIndex((r) => r.id === id)
 
     if (index === -1) {
@@ -74,16 +83,20 @@ export const updateRecipe = (req, res, next) => {
 
     recipes[index] = { ...recipes[index], ...update }
 
-    res.status(201).json(recipes[index])
+    await writeRecipes(recipes)
+
+    res.status(200).json(recipes[index])
   } catch (err) {
     next(err)
   }
 }
 
-export const deleteRecipe = (req, res, next) => {
+export const deleteRecipe = async (req, res, next) => {
   const id = req.params.id
 
   try {
+    const recipes = await readRecipes()
+
     const index = recipes.findIndex((r) => r.id === id)
 
     if (index === -1) {
@@ -91,13 +104,16 @@ export const deleteRecipe = (req, res, next) => {
     }
 
     recipes.splice(index, 1)
+
+    await writeRecipes(recipes)
+
     res.status(204).end()
   } catch (err) {
     next(err)
   }
 }
 
-const createStats = () => {
+const createStats = (recipes) => {
   let totalNumber = 0
   let avgCookingTime = 0
   let recByDifficulty = { easy: [], hard: [], medium: [] }
@@ -132,9 +148,10 @@ const createStats = () => {
   return { totalNumber, avgCookingTime, recByDifficulty, mostCommonIng }
 }
 
-export const getStats = (req, res, next) => {
+export const getStats = async (req, res, next) => {
   try {
-    const stats = createStats()
+    const recipes = await readRecipes()
+    const stats = createStats(recipes)
 
     res.status(200).json(stats)
   } catch (err) {
