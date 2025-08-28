@@ -1,36 +1,65 @@
 import { v4 as uuidv4 } from "uuid"
 import { readRecipes, writeRecipes } from "../utils/fileHelpers.js"
 
-export const getAllRecipes = async (req, res, next) => {
-  //GET /recipes?difficulty=easy%20medium&maxCookingTime=30&search=pasta%20tomato
-  const { difficulty, maxCookingTime, search } = req.query
+const filterRecipes = (recipes, query) => {
+  const { difficulty, maxCookingTime, search } = query
+  const maxTime = Number(maxCookingTime)
 
+  const filtered = recipes.filter((r) => {
+    const matchesDifficulty = difficulty ? difficulty.split(" ").includes(r.difficulty) : true
+
+    const matchesTime =
+      maxCookingTime && !isNaN(maxTime) ? r.cookingTime <= Number(maxCookingTime) : true
+
+    const matchesSearch = search
+      ? search
+          .split(" ")
+          .some(
+            (searchWord) =>
+              r.title.toLowerCase().includes(searchWord.toLowerCase()) ||
+              r.description.toLowerCase().includes(searchWord.toLowerCase())
+          )
+      : true
+
+    return matchesDifficulty && matchesSearch && matchesTime
+  })
+
+  return filtered
+}
+
+const sortRecipes = (recipes, query) => {
+  const { sort, order = "asc" } = query
+
+  const sortKeys = {
+    rating: (r) => r.rating,
+    cookingTime: (r) => r.cookingTime,
+    date: (r) => new Date(r.createdAt).getTime(),
+  }
+
+  const getValue = sortKeys[sort]
+  if (!getValue) return recipes
+
+  return [...recipes].sort((a, b) => {
+    const aVal = getValue(a)
+    const bVal = getValue(b)
+    return order === "desc" ? bVal - aVal : aVal - bVal
+  })
+}
+
+export const getAllRecipes = async (req, res, next) => {
+  //GET /recipes?difficulty=easy%20medium&maxCookingTime=30&search=pasta%20tomato&sort=rating&order=desc
   try {
     const recipes = await readRecipes()
-    const maxTime = Number(maxCookingTime)
 
-    const filteredRecipes = recipes.filter((r) => {
-      const matchesDifficulty = difficulty ? difficulty.split(" ").includes(r.difficulty) : true
-      const matchesTime =
-        maxCookingTime && !isNaN(maxTime) ? r.cookingTime <= Number(maxCookingTime) : true
-      const matchesSearch = search
-        ? search
-            .split(" ")
-            .some(
-              (searchWord) =>
-                r.title.toLowerCase().includes(searchWord.toLowerCase()) ||
-                r.description.toLowerCase().includes(searchWord.toLowerCase())
-            )
-        : true
-
-      return matchesDifficulty && matchesSearch && matchesTime
-    })
+    const filteredRecipes = filterRecipes(recipes, req.query)
 
     if (!filteredRecipes.length) {
       return res.status(404).json({ message: "No recipes found" })
     }
 
-    res.status(200).json(filteredRecipes)
+    const sortedRecipes = sortRecipes(filteredRecipes, req.query)
+
+    res.status(200).json(sortedRecipes)
   } catch (err) {
     next(err)
   }
