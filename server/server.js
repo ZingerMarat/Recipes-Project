@@ -2,11 +2,13 @@ import express from "express"
 import recipesRouter from "./routes/recipesRouter.js"
 import morgan from "morgan"
 import { rateLimit } from "./middleware/rateLimit.js"
+import { connectDB } from "./db/db.js"
 
 const PORT = 3000
 morgan.token("timestamp", () => new Date().toISOString())
 
 const app = express()
+connectDB()
 
 app.use(express.json())
 app.use(morgan(":method :url :status - :response-time ms [:timestamp]"))
