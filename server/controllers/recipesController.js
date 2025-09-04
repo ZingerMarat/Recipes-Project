@@ -122,20 +122,20 @@ export const updateRecipe = async (req, res, next) => {
     } = req.body
 
     const recipeId = req.params.id
-    const userId = req.userID
+    const plainRecipe = req.plainRecipe
+    //const userId = req.userID
 
-    //const recipes = await readRecipes()
-    const recipe = await Recipe.findByPk(recipeId)
+    // const recipe = await Recipe.findByPk(recipeId)
 
-    if (!recipe) {
-      return res.status(404).json({ message: "Recipe not found" })
-    }
+    // if (!recipe) {
+    //   return res.status(404).json({ message: "Recipe not found" })
+    // }
 
-    const plainRecipe = recipe.get({ plain: true })
+    // const plainRecipe = recipe.get({ plain: true })
 
-    if (plainRecipe.userId !== userId) {
-      return res.status(403).json({ message: "You are not authorized to update this recipe" })
-    }
+    // if (plainRecipe.userId !== userId) {
+    //   return res.status(403).json({ message: "You are not authorized to update this recipe" })
+    // }
 
     const update = {
       title,
@@ -162,23 +162,25 @@ export const deleteRecipe = async (req, res, next) => {
   //DELETE /api/recipes/:id (Protected)
   try {
     const recipeId = req.params.id
-    const userId = req.userID
+    //const userId = req.userID
+    const plainRecipe = req.plainRecipe
 
-    const recipe = await Recipe.findByPk(recipeId)
+    //const recipe = await Recipe.findByPk(recipeId)
 
-    if (!recipe) {
-      return res.status(404).json({ message: "Recipe not found" })
-    }
+    // if (!recipe) {
+    //   return res.status(404).json({ message: "Recipe not found" })
+    // }
 
-    const plainRecipe = recipe.get({ plain: true })
+    //const plainRecipe = recipe.get({ plain: true })
 
-    if (plainRecipe.userId !== userId) {
-      return res.status(403).json({ message: "You are not authorized to delete this recipe" })
-    }
+    // if (plainRecipe.userId !== userId) {
+    //   return res.status(403).json({ message: "You are not authorized to delete this recipe" })
+    // }
 
     const imagePath = plainRecipe.imageUrl
 
-    await recipe.destroy()
+    //await recipe.destroy()
+    await Recipe.destroy({ where: { id: recipeId } })
 
     if (imagePath) {
       const fullPath = path.join(__dirname, "../public", imagePath)
