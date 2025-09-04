@@ -55,6 +55,12 @@ if (User && Recipe && UserFavorite) {
     foreignKey: "recipeId",
     otherKey: "userId",
   })
+
+  Recipe.hasMany(UserFavorite, { foreignKey: "recipeId" })
+  UserFavorite.belongsTo(Recipe, { foreignKey: "recipeId" })
+
+  User.hasMany(UserFavorite, { foreignKey: "userId" })
+  UserFavorite.belongsTo(User, { foreignKey: "userId" })
 }
 
 db.sequelize = sequelize

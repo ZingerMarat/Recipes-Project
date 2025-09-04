@@ -1,15 +1,12 @@
-import { v4 as uuidv4 } from "uuid"
-import { readRecipes, writeRecipes } from "../utils/fileHelpers.js"
 import { Op } from "sequelize"
 
 import db from "../db/models/index.js"
-const { Recipe, User } = db
+const { Recipe } = db
 
 import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
 import { dirname } from "path"
-import { log } from "console"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -123,19 +120,6 @@ export const updateRecipe = async (req, res, next) => {
 
     const recipeId = req.params.id
     const plainRecipe = req.plainRecipe
-    //const userId = req.userID
-
-    // const recipe = await Recipe.findByPk(recipeId)
-
-    // if (!recipe) {
-    //   return res.status(404).json({ message: "Recipe not found" })
-    // }
-
-    // const plainRecipe = recipe.get({ plain: true })
-
-    // if (plainRecipe.userId !== userId) {
-    //   return res.status(403).json({ message: "You are not authorized to update this recipe" })
-    // }
 
     const update = {
       title,
@@ -162,24 +146,10 @@ export const deleteRecipe = async (req, res, next) => {
   //DELETE /api/recipes/:id (Protected)
   try {
     const recipeId = req.params.id
-    //const userId = req.userID
     const plainRecipe = req.plainRecipe
-
-    //const recipe = await Recipe.findByPk(recipeId)
-
-    // if (!recipe) {
-    //   return res.status(404).json({ message: "Recipe not found" })
-    // }
-
-    //const plainRecipe = recipe.get({ plain: true })
-
-    // if (plainRecipe.userId !== userId) {
-    //   return res.status(403).json({ message: "You are not authorized to delete this recipe" })
-    // }
 
     const imagePath = plainRecipe.imageUrl
 
-    //await recipe.destroy()
     await Recipe.destroy({ where: { id: recipeId } })
 
     if (imagePath) {

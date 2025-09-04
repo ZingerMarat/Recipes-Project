@@ -1,6 +1,7 @@
 import express from "express"
 import authRouter from "./routes/authRouter.js"
 import recipesRouter from "./routes/recipesRouter.js"
+import favoritesRouter from "./routes/favoritesRouter.js"
 import morgan from "morgan"
 import { rateLimit } from "./middleware/rateLimit.js"
 import { connectDB } from "./db/db.js"
@@ -12,14 +13,15 @@ const app = express()
 connectDB()
 
 app.use(express.json())
-app.use(morgan(":method :url :status - :response-time ms [:timestamp]"))
 app.use(express.static("public"))
 
-//rate limit 10 req on 1 minute
-app.use(rateLimit(10, 60 * 1000))
+app.use(morgan(":method :url :status - :response-time ms [:timestamp]"))
+
+app.use(rateLimit(10, 60 * 1000)) //rate limit 10 req on 1 minute
 
 app.use("/api/auth", authRouter)
 app.use("/api/recipes", recipesRouter)
+app.use("/api/users/favorites", favoritesRouter)
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`)

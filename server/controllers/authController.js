@@ -12,14 +12,6 @@ const JWT_EXPIRES_IN = "1h"
 const saltRounds = 10
 
 export const register = async (req, res) => {
-  // Request body
-  // {
-  //   username: "johndoe",
-  //   email: "john@example.com",
-  //   password: "password123",
-  //   firstName: "John",
-  //   lastName: "Doe"
-  // }
   try {
     const { username, email, password, firstName, lastName } = req.body
 
