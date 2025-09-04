@@ -10,13 +10,14 @@ import {
   updateRating,
 } from "../controllers/recipesController.js"
 import { validateRecipeMiddleware } from "../middleware/validateRecipeMiddleware.js"
+import { upload } from "../middleware/upload.js"
 
 const router = express.Router()
 
 router.get("/", getAllRecipes)
 router.get("/stats", getStats)
 router.get("/:id", getRecipe)
-router.post("/", validateRecipeMiddleware, addRecipe)
+router.post("/", upload.single("image"), validateRecipeMiddleware, addRecipe)
 router.put("/:id", validateRecipeMiddleware, updateRecipe)
 router.put("/:id/rating/:rating", updateRating)
 router.delete("/:id", deleteRecipe)

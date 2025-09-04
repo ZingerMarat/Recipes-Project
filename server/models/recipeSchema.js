@@ -27,5 +27,6 @@ export const recipeSchema = {
     "servings",
     "difficulty",
   ],
-  additionalProperties: false,
+  //TODO: additionalProperties: false,
+  additionalProperties: true,
 }

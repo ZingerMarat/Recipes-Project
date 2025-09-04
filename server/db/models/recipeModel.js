@@ -1,4 +1,3 @@
-import def from "ajv/dist/vocabularies/applicator/additionalItems"
 import { DataTypes } from "sequelize"
 
 export default (sequelize) => {

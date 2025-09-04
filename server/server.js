@@ -12,6 +12,7 @@ connectDB()
 
 app.use(express.json())
 app.use(morgan(":method :url :status - :response-time ms [:timestamp]"))
+app.use(express.static("public"))
 
 //rate limit 10 req on 1 minute
 app.use(rateLimit(10, 60 * 1000))

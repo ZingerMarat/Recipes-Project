@@ -1,65 +1,42 @@
 import { v4 as uuidv4 } from "uuid"
 import { readRecipes, writeRecipes } from "../utils/fileHelpers.js"
+import { Op } from "sequelize"
 
-const filterRecipes = (recipes, query) => {
-  const { difficulty, maxCookingTime, search } = query
-  const maxTime = Number(maxCookingTime)
+import db from "../db/models/index.js"
 
-  const filtered = recipes.filter((r) => {
-    const matchesDifficulty = difficulty ? difficulty.split(" ").includes(r.difficulty) : true
-
-    const matchesTime =
-      maxCookingTime && !isNaN(maxTime) ? r.cookingTime <= Number(maxCookingTime) : true
-
-    const matchesSearch = search
-      ? search
-          .split(" ")
-          .some(
-            (searchWord) =>
-              r.title.toLowerCase().includes(searchWord.toLowerCase()) ||
-              r.description.toLowerCase().includes(searchWord.toLowerCase())
-          )
-      : true
-
-    return matchesDifficulty && matchesSearch && matchesTime
-  })
-
-  return filtered
-}
-
-const sortRecipes = (recipes, query) => {
-  const { sort, order = "asc" } = query
-
-  const sortKeys = {
-    rating: (r) => r.rating,
-    cookingTime: (r) => r.cookingTime,
-    date: (r) => new Date(r.createdAt).getTime(),
-  }
-
-  const getValue = sortKeys[sort]
-  if (!getValue) return recipes
-
-  return [...recipes].sort((a, b) => {
-    const aVal = getValue(a)
-    const bVal = getValue(b)
-    return order === "desc" ? bVal - aVal : aVal - bVal
-  })
-}
+const { Recipe, User } = db
 
 export const getAllRecipes = async (req, res, next) => {
   //GET /recipes?difficulty=easy%20medium&maxCookingTime=30&search=pasta%20tomato&sort=rating&order=desc
+
   try {
-    const recipes = await readRecipes()
+    const { difficulty, maxCookingTime, search, sort, order = "asc" } = req.query
+    const where = {}
 
-    const filteredRecipes = filterRecipes(recipes, req.query)
+    if (difficulty) {
+      where.difficulty = { [Op.or]: difficulty.split(" ") }
+    }
+    if (maxCookingTime) {
+      where.cookingTime = { [Op.lte]: maxCookingTime }
+    }
+    if (search) {
+      where.title = { [Op.like]: `%${search}%` }
+      where.description = { [Op.like]: `%${search}%` }
+    }
 
-    if (!filteredRecipes.length) {
+    let orderBy = []
+
+    if (sort) {
+      orderBy.push([sort, order.toUpperCase() === "DESC" ? "DESC" : "ASC"])
+    }
+
+    const recipes = await Recipe.findAll({ where, order: orderBy })
+
+    if (!recipes.length) {
       return res.status(404).json({ message: "No recipes found" })
     }
 
-    const sortedRecipes = sortRecipes(filteredRecipes, req.query)
-
-    res.status(200).json(sortedRecipes)
+    res.status(200).json(recipes)
   } catch (err) {
     next(err)
   }
@@ -67,11 +44,9 @@ export const getAllRecipes = async (req, res, next) => {
 
 export const getRecipe = async (req, res, next) => {
   //GET /recipes/:id
-  const id = req.params.id
-
   try {
-    const recipes = await readRecipes()
-    const recipe = recipes.find((r) => r.id === id)
+    const id = req.params.id
+    const recipe = await Recipe.findByPk(id)
 
     if (!recipe) {
       return res.status(404).json({ message: "No recipe found with the same id" })
@@ -85,17 +60,42 @@ export const getRecipe = async (req, res, next) => {
 
 export const addRecipe = async (req, res, next) => {
   //POST /recipes/
-  const newRecipe = req.body
-  const id = uuidv4()
-  const createdAt = new Date().toISOString()
-
   try {
-    const recipes = await readRecipes()
+    const {
+      title,
+      description,
+      ingredients,
+      instructions,
+      cookingTime,
+      servings,
+      difficulty,
+      isPublic,
+      //TODO: change hardecoded to req.user.id
+      userId,
+    } = req.body
 
-    const recipe = { id, ...newRecipe, createdAt }
-    recipes.push(recipe)
+    if (!title) {
+      return res.status(400).json({ message: "Title is required" })
+    }
 
-    await writeRecipes(recipes)
+    const recipe = await Recipe.create({
+      title,
+      description,
+      ingredients,
+      instructions,
+      cookingTime,
+      servings,
+      difficulty,
+      isPublic: isPublic !== undefined ? isPublic : true,
+      imageUrl: req.file ? `/uploads/recipes/${req.file.filename}` : null,
+      //TODO: change hardecoded to req.user.id
+      //userId: req.user.id,
+      userId,
+    })
+
+    if (!recipe) {
+      return res.status(500).json({ message: "Failed to create recipe" })
+    }
 
     res.status(201).json(recipe)
   } catch (err) {

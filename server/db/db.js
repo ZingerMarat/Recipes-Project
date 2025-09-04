@@ -1,14 +1,10 @@
-import { Sequelize } from "sequelize"
+import db from "./models/index.js"
 
-const sequelize = new Sequelize("mysql://root:1234@localhost/recipes_project")
-
-const connectDB = async () => {
+export async function connectDB() {
   try {
-    await sequelize.authenticate()
-    console.log("Connection has been established successfully.")
+    await db.sequelize.authenticate()
+    console.log("✅ Database connection has been established successfully.")
   } catch (error) {
-    console.error("Unable to connect to the database:", error)
+    console.error("❌ Unable to connect to the database:", error)
   }
 }
-
-export { sequelize, connectDB }
