@@ -11,6 +11,6 @@ module.exports = {
   },
   production: {
     use_env_variable: "DB_CONNECTION",
-    dialect: "mysql",
+    dialect: "postgres",
   },
 }

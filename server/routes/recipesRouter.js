@@ -16,20 +16,21 @@ import { checkRecipeOwnership } from "../middleware/checkRecipeOwnership.js"
 const router = express.Router()
 
 router.get("/", getAllRecipes)
-//router.get("/stats", getStats)
 router.get("/my-recipes", verifyToken, getUsersRecipes)
 router.get("/:id", getRecipe)
 
-router.post("/", upload.single("image"), verifyToken, validateRecipeMiddleware, addRecipe)
+router.post("/", verifyToken, upload.single("image"), validateRecipeMiddleware, addRecipe)
 
 router.put(
   "/:id",
-  upload.single("image"),
   verifyToken,
+  upload.single("image"),
   checkRecipeOwnership,
   validateRecipeMiddleware,
   updateRecipe
 )
+
+//router.get("/stats", getStats)
 //router.put("/:id/rating/:rating", updateRating)
 
 router.delete("/:id", verifyToken, checkRecipeOwnership, deleteRecipe)

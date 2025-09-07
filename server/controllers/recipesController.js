@@ -100,6 +100,16 @@ export const addRecipe = async (req, res, next) => {
 
     res.status(201).json(recipe)
   } catch (err) {
+    //delete uploaded file if error occurs
+    if (req.file) {
+      const filePath = path.join(__dirname, "../public/uploads/recipes", req.file.filename)
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error("Error deleting file:", err)
+        }
+      })
+    }
+
     next(err)
   }
 }
