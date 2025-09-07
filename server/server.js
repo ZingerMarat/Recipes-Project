@@ -6,8 +6,9 @@ import morgan from "morgan"
 import { rateLimit } from "./middleware/rateLimit.js"
 import { connectDB } from "./db/db.js"
 //import cookieParser from "cookie-parser"
+import cors from "cors"
 
-const PORT = 3000
+const PORT = process.env.PORT || 8080
 morgan.token("timestamp", () => new Date().toISOString())
 
 const app = express()
@@ -15,6 +16,12 @@ connectDB()
 
 //app.use(cors({ origin: "http://localhost:5173", credentials: true })) // for local development
 //app.use(cors({ origin: "https://your-production-domain.com", credentials: true })) // for production
+
+app.use(
+  cors({
+    origin: "*",
+  })
+)
 
 //app.use(cookieParser("mySecretKey"))
 
@@ -30,7 +37,7 @@ app.use("/api/recipes", recipesRouter)
 app.use("/api/users/favorites", favoritesRouter)
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`)
+  console.log(`Server running on port: ${PORT}`)
 })
 
 // Error Handling Middleware
