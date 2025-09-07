@@ -2,7 +2,7 @@ require("dotenv").config()
 
 module.exports = {
   development: {
-    use_env_variable: "DB_CONNECTION",
+    use_env_variable: "DB_CONNECTION_MYSQL",
     dialect: "mysql",
   },
   test: {
