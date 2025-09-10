@@ -8,6 +8,7 @@ import {
   deleteRecipe,
   getUsersRecipes,
   addComment,
+  getCommentsById,
 } from "../controllers/recipesController.js"
 import { validateRecipeMiddleware } from "../middleware/validateRecipeMiddleware.js"
 import { upload } from "../middleware/upload.js"
@@ -18,6 +19,7 @@ const router = express.Router()
 
 router.get("/", getAllRecipes)
 router.get("/my-recipes", verifyToken, getUsersRecipes)
+router.get("/:id/comments", getCommentsById)
 router.get("/:id", getRecipe)
 
 router.post("/", verifyToken, upload.single("image"), validateRecipeMiddleware, addRecipe)

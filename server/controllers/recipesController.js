@@ -221,3 +221,41 @@ export const addComment = async (req, res, next) => {
     next(err)
   }
 }
+
+export const getCommentsById = async (req, res, next) => {
+  try {
+    const recipeId = req.params.id
+    const page = req.query.page ? Number(req.query.page) : 1
+    const limit = req.query.limit ? Number(req.query.limit) : 10
+
+    const skip = (page - 1) * limit
+
+    const comments = await Comment.find({ recipeId })
+      .sort({ crearedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .select("username comment rating likes createdAt")
+
+    const total = await Comment.countDocuments({ recipeId })
+
+    const avgRating = await Comment.aggregate([
+      { $match: { recipeId } },
+      {
+        $group: {
+          _id: null,
+          avgRating: { $avg: "$rating" },
+        },
+      },
+    ])
+
+    res.status(200).json({
+      comments,
+      page,
+      limit,
+      total,
+      rating: avgRating[0].avgRating || 0,
+    })
+  } catch (err) {
+    next(err)
+  }
+}
