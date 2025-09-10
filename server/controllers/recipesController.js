@@ -7,6 +7,7 @@ import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
 import { dirname } from "path"
+import Comment from "../mongoDB/models/commentSchema.js"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -194,6 +195,28 @@ export const getUsersRecipes = async (req, res, next) => {
     }
 
     res.status(200).json(recipes)
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const addComment = async (req, res, next) => {
+  try {
+    const recipeId = req.params.id
+    const userId = req.userID
+    const username = req.username
+
+    const newComment = new Comment({
+      recipeId: recipeId,
+      userId: userId,
+      username: username,
+      comment: req.body.comment,
+      rating: req.body.rating,
+    })
+
+    await newComment.save()
+
+    res.status(201).json(newComment)
   } catch (err) {
     next(err)
   }

@@ -7,12 +7,14 @@ import { rateLimit } from "./middleware/rateLimit.js"
 import { connectDB } from "./db/db.js"
 //import cookieParser from "cookie-parser"
 import cors from "cors"
+import connectMongoDB from "./mongoDB/db.js"
 
 const PORT = process.env.PORT || 8080
 morgan.token("timestamp", () => new Date().toISOString())
 
 const app = express()
 connectDB()
+connectMongoDB()
 
 //app.use(cors({ origin: "http://localhost:5173", credentials: true })) // for local development
 //app.use(cors({ origin: "https://your-production-domain.com", credentials: true })) // for production

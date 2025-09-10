@@ -7,6 +7,7 @@ import {
   updateRecipe,
   deleteRecipe,
   getUsersRecipes,
+  addComment,
 } from "../controllers/recipesController.js"
 import { validateRecipeMiddleware } from "../middleware/validateRecipeMiddleware.js"
 import { upload } from "../middleware/upload.js"
@@ -20,6 +21,7 @@ router.get("/my-recipes", verifyToken, getUsersRecipes)
 router.get("/:id", getRecipe)
 
 router.post("/", verifyToken, upload.single("image"), validateRecipeMiddleware, addRecipe)
+router.post("/:id/comments", verifyToken, addComment)
 
 router.put(
   "/:id",

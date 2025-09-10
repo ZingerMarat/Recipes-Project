@@ -75,7 +75,9 @@ export const login = async (req, res) => {
       })
     }
 
-    const token = jwt.sign({ id: plainUser.id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+    const token = jwt.sign({ id: plainUser.id, username: plainUser.username }, JWT_SECRET, {
+      expiresIn: JWT_EXPIRES_IN,
+    })
 
     //res.cookie("token", token, { httpOnly: true, signed: true, sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", secure: process.env.NODE_ENV === "production" ? true : false }) //1 hour
 
