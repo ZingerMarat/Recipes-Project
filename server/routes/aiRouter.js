@@ -4,7 +4,7 @@ import { getRecipeSuggestions, getIngredientSubstitutions } from "../controllers
 
 const router = express.Router()
 
-router.post("/recipe-suggections", verifyToken, getRecipeSuggestions)
+router.post("/recipe-suggestions", verifyToken, getRecipeSuggestions)
 router.post("/ingredient-substitutions", verifyToken, getIngredientSubstitutions)
 
 export default router
