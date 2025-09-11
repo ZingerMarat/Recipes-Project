@@ -3,6 +3,7 @@ import authRouter from "./routes/authRouter.js"
 import recipesRouter from "./routes/recipesRouter.js"
 import favoritesRouter from "./routes/favoritesRouter.js"
 import commentsRouter from "./routes/commentsRouter.js"
+import collectionsRouter from "./routes/collectionsRouter.js"
 import morgan from "morgan"
 import { rateLimit } from "./middleware/rateLimit.js"
 import { connectDB } from "./db/db.js"
@@ -39,6 +40,7 @@ app.use("/api/auth", authRouter)
 app.use("/api/recipes", recipesRouter)
 app.use("/api/users/favorites", favoritesRouter)
 app.use("/api/comments", commentsRouter)
+app.use("/api/collections", collectionsRouter)
 
 app.listen(PORT, () => {
   console.log(`Server running on port: ${PORT}`)

@@ -17,7 +17,7 @@ const recipeCollectionSchema = new mongoose.Schema(
     tags: { type: [String], default: [] },
   },
   {
-    timestamp: true,
+    timestamps: true,
   }
 )
 

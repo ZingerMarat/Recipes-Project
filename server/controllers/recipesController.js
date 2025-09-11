@@ -1,5 +1,6 @@
 import { Op } from "sequelize"
 
+import Comment from "../mongoDB/models/commentSchema.js"
 import db from "../db/models/index.js"
 const { Recipe } = db
 
@@ -7,7 +8,6 @@ import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
 import { dirname } from "path"
-import Comment from "../mongoDB/models/commentSchema.js"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
